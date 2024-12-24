@@ -2,6 +2,7 @@
 use std::fmt::{Debug, Formatter};
 
 /// Error type for when a cell is accessed out of bounds on a board.
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct OutOfBoundsSetError {
     pub x: usize,
     pub y: usize,

@@ -128,5 +128,5 @@ fn test_board_set_out_of_bounds() {
 
     let mut board: Board<GameOfLifeState> = Board::new(initial_state.clone());
 
-    assert!(board.set(3, 3, GameOfLifeState::Dead).unwrap_err().x == OutOfBoundsSetError { x: 3, y: 3, width: 3, height: 3 }.x);
+    assert!(board.set(3, 3, GameOfLifeState::Dead).unwrap_err() == OutOfBoundsSetError { x: 3, y: 3, width: 3, height: 3 });
 }
