@@ -2,5 +2,12 @@
 name = "live-iron"
 version = "0.1.0"
 edition = "2021"
+keywords = ["rust", "machine_learning", "deep_learning", "data_science"]
+categories = ["science"]
+authors = ["LordSaumya"]
+license = "MIT"
+repository = "https://github.com/LordSaumya/live-iron"
+description = "A performant cellular automata library for Rust"
+readme = "README.md"
 
 [dependencies]
