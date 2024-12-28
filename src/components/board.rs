@@ -1,8 +1,17 @@
 use std::fmt::Debug;
-use std::vec;
-use crate::components::state::State;
-use crate::components::error::OutOfBoundsSetError;
+use super::state::State;
+use super::error::OutOfBoundsSetError;
 
+/// The type of boundary condition to use for the board, which determines how to handle cells at the edges of the board.
+/// 
+/// The boundary conditions are:
+/// - Periodic: The board wraps around at the edges.
+/// - Fixed: The cells at the edges are fixed with a given state.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum BoundaryCondition<S: State> {
+    Periodic,
+    Fixed(S),
+}
 
 /// A struct that represents a board of cells in a cellular automaton.
 /// 
@@ -20,6 +29,7 @@ use crate::components::error::OutOfBoundsSetError;
 pub struct Board<S: State> {
     cells: Vec<S>,
     dim: (usize, usize),
+    boundary_condition: BoundaryCondition<S>,
 }
 
 impl<S: State> Board<S> {
@@ -27,10 +37,11 @@ impl<S: State> Board<S> {
     /// 
     /// # Arguments
     /// - `initial_state`: The initial state of the cells in the board as a 2D vector.
-    pub fn new(initial_state: Vec<Vec<S>>) -> Self {
+    pub fn new(initial_state: Vec<Vec<S>>, boundary_condition: BoundaryCondition<S>) -> Self {
         Self {
             dim: (initial_state[0].len(), initial_state.len()),
             cells: initial_state.into_iter().flatten().collect(),
+            boundary_condition,
         }
     }
 
@@ -42,6 +53,11 @@ impl<S: State> Board<S> {
     /// Get the height of the board.
     pub fn height(&self) -> usize {
         self.dim.1
+    }
+
+    /// Get the boundary condition of the board.
+    pub fn boundary_condition(&self) -> BoundaryCondition<S> {
+        self.boundary_condition.clone()
     }
 
     /// Get the state of a cell on the board.
