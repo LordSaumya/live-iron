@@ -1,5 +1,5 @@
-use crate::components::state::State;
-use crate::components::board::Board;
+use super::state::State;
+use super::board::{Board, BoundaryCondition};
 
 /// The type of neighbourhood to use for a cellular automaton, which determines the cells to consider when updating a cell.
 /// 
@@ -48,6 +48,7 @@ impl Neighbourhood {
     /// 
     /// A vector of the coordinates of the cells in the neighbourhood.
     pub fn get_neighbourhood<S: State>(&self, board: &Board<S>, x: usize, y: usize) -> Vec<Option<(usize, usize)>> {
+        let boundary_condition: BoundaryCondition<S> = board.boundary_condition();
         let mut neighbourhood: Vec<Option<(usize, usize)>> = Vec::with_capacity((2 * self.radius + 1) * (2 * self.radius + 1) - 1);
         let (width, height) = (board.width(), board.height());
 
@@ -55,19 +56,20 @@ impl Neighbourhood {
             NeighbourhoodType::VonNeumann => {
                 for i in (x as isize - self.radius as isize)..=(x as isize + self.radius as isize) {
                     for j in (y as isize - self.radius as isize)..=(y as isize + self.radius as isize) {
-                        if (i == x as isize && j == y as isize) || i < 0 || j < 0 || i >= width as isize || j >= height as isize {
+                        if (i - x as isize).abs() + (j - y as isize).abs() > self.radius as isize {
                             continue;
                         }
-
-                        if (i - x as isize).abs() + (j - y as isize).abs() <= self.radius as isize {
-                            let nx: usize = i.rem_euclid(width as isize) as usize;
-                            let ny: usize = j.rem_euclid(height as isize) as usize;
-                            match board.get(nx, ny) {
-                                Some(_cell) => {
-                                    neighbourhood.push(Some((nx, ny)));
-                                }
-                                None => {
+                        match boundary_condition {
+                            BoundaryCondition::Periodic => {
+                                let nx = i.rem_euclid(width as isize) as usize;
+                                let ny = j.rem_euclid(height as isize) as usize;
+                                neighbourhood.push(Some((nx, ny)));
+                            }
+                            BoundaryCondition::Fixed(_) => {
+                                if i < 0 || j < 0 || i >= width as isize || j >= height as isize {
                                     neighbourhood.push(None);
+                                } else {
+                                    neighbourhood.push(Some((i as usize, j as usize)));
                                 }
                             }
                         }
@@ -77,19 +79,18 @@ impl Neighbourhood {
             NeighbourhoodType::Moore => {
                 for i in (x as isize - self.radius as isize)..=(x as isize + self.radius as isize) {
                     for j in (y as isize - self.radius as isize)..=(y as isize + self.radius as isize) {
-                        if i < 0 || j < 0 || i >= width as isize || j >= height as isize {
-                            continue;
-                        }
-
-                        let nx: usize = i.rem_euclid(width as isize) as usize;
-                        let ny: usize = j.rem_euclid(height as isize) as usize;
-
-                        match board.get(nx, ny) {
-                            Some(_cell) => {
+                        match boundary_condition {
+                            BoundaryCondition::Periodic => {
+                                let nx = i.rem_euclid(width as isize) as usize;
+                                let ny = j.rem_euclid(height as isize) as usize;
                                 neighbourhood.push(Some((nx, ny)));
                             }
-                            None => {
-                                neighbourhood.push(None);
+                            BoundaryCondition::Fixed(_) => {
+                                if i < 0 || j < 0 || i >= width as isize || j >= height as isize {
+                                    neighbourhood.push(None);
+                                } else {
+                                    neighbourhood.push(Some((i as usize, j as usize)));
+                                }
                             }
                         }
                     }
@@ -120,7 +121,17 @@ impl Neighbourhood {
         let neighbours: Vec<Option<(usize, usize)>> = self.get_neighbourhood(board, x, y);
         let mut neighbourhood_states: Vec<Option<S>> = Vec::with_capacity(neighbours.len());
         
-        neighbours.iter().map(|neighbour| neighbourhood_states.push(board.get(neighbour.unwrap().0, neighbour.unwrap().1))).for_each(drop);
+        for n in neighbours {
+            match n {
+                Some((nx, ny)) => {
+                    neighbourhood_states.push(board.get(nx, ny));
+                }
+                None => match board.boundary_condition() {
+                    BoundaryCondition::Fixed(val) => neighbourhood_states.push(Some(val)),
+                    _ => neighbourhood_states.push(None),
+                }
+            }
+        }
         neighbourhood_states
     }
 }
