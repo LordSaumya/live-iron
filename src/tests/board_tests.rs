@@ -147,3 +147,25 @@ fn test_board_set_out_of_bounds() {
 
     assert!(board.set(3, 3, GameOfLifeState::Dead).unwrap_err() == OutOfBoundsSetError { x: 3, y: 3, width: 3, height: 3 });
 }
+
+#[test]
+fn test_board_iter_coords() {
+    let initial_state: Vec<Vec<GameOfLifeState>> = vec![
+        vec![0, 1, 0],
+        vec![1, 0, 1],
+        vec![0, 1, 0],
+    ].iter().map(|x| x.iter().map(|&y| match y {
+        0 => GameOfLifeState::Dead,
+        1 => GameOfLifeState::Alive,
+        _ => panic!("Invalid state"),
+    }).collect()).collect();
+
+    let board: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
+
+    let mut coords: Vec<(usize, usize)> = Vec::new();
+    board.iter_coords().for_each(|coord| {
+        coords.push(coord);
+    });
+
+    assert_eq!(coords, vec![(0, 0), (1, 0), (2, 0), (0, 1), (1, 1), (2, 1), (0, 2), (1, 2), (2, 2)]);
+}
