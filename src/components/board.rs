@@ -101,4 +101,55 @@ impl<S: State> Board<S> {
         }
         Ok(())
     }
+
+    /// Get an iterator over the coordinates of the board.
+    /// 
+    /// # Returns
+    /// 
+    /// An iterator over the cell coordinates of the board in row-major order.
+    /// 
+    /// The iterator yields tuples of the form `(x, y)`.
+    pub fn iter_coords(&self) -> IterCoords {
+        IterCoords {
+            x: 0,
+            y: 0,
+            width: self.dim.0,
+            height: self.dim.1,
+        }
+    }
+}
+
+/// An iterator over the coordinates of a board.
+/// 
+/// The iterator yields tuples of the form `(x, y)`.
+/// 
+/// # Fields
+/// 
+/// - `x`: The current x-coordinate.
+/// - `y`: The current y-coordinate.
+/// - `width`: The width of the board.
+/// - `height`: The height of the board.
+pub struct IterCoords {
+    x: usize,
+    y: usize,
+    width: usize,
+    height: usize,
+}
+
+impl Iterator for IterCoords {
+    type Item = (usize, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.y < self.height {
+            let coord: (usize, usize) = (self.x, self.y);
+            self.x += 1;
+            if self.x == self.width {
+                self.x = 0;
+                self.y += 1;
+            }
+            Some(coord)
+        } else {
+            None
+        }
+    }
 }
