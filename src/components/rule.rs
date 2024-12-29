@@ -2,8 +2,6 @@ use super::{board::Board, error::OutOfBoundsSetError, state::State};
 
 /// A trait that defines a rule for updating the state of a cell in a cellular automaton.
 ///
-/// The rule takes the coordinates of the cell and the board of cells as input and returns the new state of the cell.
-///
 /// # Type Parameters
 ///
 /// - `S`: The type of state that each cell in the board can have.
@@ -18,13 +16,59 @@ pub trait Rule<S: State>: Send + Sync {
     ///
     /// # Returns
     ///
-    /// The new state of the cell at the given coordinates, or an error if the coordinates are out of bounds.
-    fn apply(&self, coord: (usize, usize), board: &mut Board<S>) -> Result<S, OutOfBoundsSetError>;
+    /// A vector of deltas to the board, or an error if the coordinates are out of bounds.
+    fn delta(&self, coord: (usize, usize), board: &Board<S>) -> Result<Vec<Delta<S>>, OutOfBoundsSetError>;
+}
+
+/// A struct that represents a change to the state of a cell in a cellular automaton.
+/// 
+/// The struct contains the x and y coordinates of the cell and the new state of the cell.
+/// 
+/// # Type Parameters
+/// 
+/// - `S`: The type of state that each cell in the board can have.
+/// 
+/// # Fields
+/// 
+/// - `x`: The x-coordinate of the cell.
+/// - `y`: The y-coordinate of the cell.
+/// - `state`: The new state of the cell.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Delta<S: State> {
+    pub x: usize,
+    pub y: usize,
+    pub state: S,
+}
+
+impl<S: State> Delta<S> {
+    /// Create a new `Delta` with the given x and y coordinates and state.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `x`: The x-coordinate of the cell.
+    /// 
+    /// - `y`: The y-coordinate of the cell.
+    /// 
+    /// - `state`: The new state of the cell.
+    /// 
+    /// # Returns
+    /// 
+    /// A new `Delta` with the given x and y coordinates and state.
+    pub fn new(x: usize, y: usize, state: S) -> Self {
+        Self { x, y, state }
+    }
+
+    /// Apply the delta to the board.
+    pub fn apply(&self, board: &mut Board<S>) -> Result<(), OutOfBoundsSetError> {
+        board.set(self.x, self.y, self.state)
+    }
 }
 
 /// Rules for common cellular automata.
 pub mod common_rules {
-    use super::Rule;
+    use std::vec;
+
+    use super::{Rule, Delta};
     use crate::components::board::Board;
     use crate::components::error::OutOfBoundsSetError;
     use crate::components::neighbourhood::{Neighbourhood, NeighbourhoodType};
@@ -34,11 +78,11 @@ pub mod common_rules {
     pub struct GameOfLifeRule;
 
     impl Rule<GameOfLifeState> for GameOfLifeRule {
-        fn apply(
+        fn delta (
             &self,
             coord: (usize, usize),
-            board: &mut Board<GameOfLifeState>,
-        ) -> Result<GameOfLifeState, OutOfBoundsSetError> {
+            board: &Board<GameOfLifeState>,
+        ) -> Result<Vec<Delta<GameOfLifeState>>, OutOfBoundsSetError> {
             let mut num_alive: u16 = 0;
             let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
 
@@ -53,36 +97,38 @@ pub mod common_rules {
                 _ => {}
             });
 
-            match curr_state {
+            let new_state: GameOfLifeState = match curr_state {
                 GameOfLifeState::Alive => {
                     num_alive -= 1; //subtract cell from neighbourhood
                     if num_alive < 2 {
-                        Ok(GameOfLifeState::Dead)
+                        GameOfLifeState::Dead
                     } else if num_alive == 2 || num_alive == 3 {
-                        Ok(GameOfLifeState::Alive)
+                        GameOfLifeState::Alive
                     } else {
-                        Ok(GameOfLifeState::Dead)
+                        GameOfLifeState::Dead
                     }
                 }
                 GameOfLifeState::Dead => {
                     if num_alive == 3 {
-                        Ok(GameOfLifeState::Alive)
+                        GameOfLifeState::Alive
                     } else {
-                        Ok(GameOfLifeState::Dead)
+                        GameOfLifeState::Dead
                     }
                 }
-            }
+            };
+
+            Ok(vec![Delta::new(coord.0, coord.1, new_state)])
         }
     }
 
     pub struct LangtonsAntRule;
 
     impl Rule<LangtonsAntState> for LangtonsAntRule {
-        fn apply(
+        fn delta(
             &self,
             coord: (usize, usize),
-            board: &mut Board<LangtonsAntState>,
-        ) -> Result<LangtonsAntState, OutOfBoundsSetError> {
+            board: &Board<LangtonsAntState>,
+        ) -> Result<Vec<Delta<LangtonsAntState>>, OutOfBoundsSetError> {
             // Get the current state of the cell.
             let old_state: LangtonsAntState = board.get(coord.0, coord.1).ok_or(OutOfBoundsSetError {
                 x: coord.0,
@@ -93,7 +139,7 @@ pub mod common_rules {
 
             // Get the ant's direction. If the ant is not present, return the old state (no change).
             let Some(direction) = old_state.ant_direction else {
-                return Ok(old_state);
+                return Ok(vec![Delta::new(coord.0, coord.1, old_state)]);
             };
             
             // Update the cell's state based on the ant's direction and the cell's colour.
@@ -117,7 +163,8 @@ pub mod common_rules {
                 CellColour::White => CellColour::Black,
                 CellColour::Black => CellColour::White,
             };
-            let updated_old_cell = LangtonsAntState {
+
+            let updated_old_cell: LangtonsAntState = LangtonsAntState {
                 colour: flipped_colour,
                 ant_direction: None,
             };
@@ -136,12 +183,13 @@ pub mod common_rules {
                 height: board.height(),
             })?;
 
-            // Update the new cell with the new direction of the ant, and set the ant's direction.
-            next_cell.ant_direction = Some(new_direction);
-            board.set(nx, ny, next_cell)?;
+            next_cell = LangtonsAntState {
+                colour: next_cell.colour,
+                ant_direction: Some(new_direction),
+            };
 
-            // Return the updated state of the old cell.
-            Ok(updated_old_cell)
+            // Return the deltas to the old and new cells
+            Ok(vec![Delta::new(coord.0, coord.1, updated_old_cell), Delta::new(nx, ny, next_cell)])
         }
     }
 }
