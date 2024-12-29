@@ -1,4 +1,4 @@
-use crate::components::{state::State, board::Board, state::common_states::GameOfLifeState, error::OutOfBoundsSetError, board::BoundaryCondition};
+use crate::components::{board::Board, state::common_states::GameOfLifeState, error::OutOfBoundsSetError, board::BoundaryCondition};
 
 #[test]
 fn test_board_new_no_panic() {

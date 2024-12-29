@@ -1,4 +1,4 @@
-use crate::components::{state::State, board::Board, neighbourhood::Neighbourhood, neighbourhood::NeighbourhoodType, state::common_states::GameOfLifeState, board::BoundaryCondition};
+use crate::components::{board::Board, neighbourhood::Neighbourhood, neighbourhood::NeighbourhoodType, state::common_states::GameOfLifeState, board::BoundaryCondition};
 
 #[test]
 fn test_neighbourhood_new_no_panic() {
