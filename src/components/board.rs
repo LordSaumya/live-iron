@@ -27,6 +27,8 @@ pub enum BoundaryCondition<S: State> {
 /// 
 /// - `cells`: A vector of the cells in the board.
 /// - `dim`: A tuple containing the width and height of the board.
+/// - `boundary_condition`: The boundary condition of the board.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Board<S: State> {
     cells: Vec<S>,
     dim: (usize, usize),
