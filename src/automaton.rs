@@ -1,7 +1,6 @@
 use super::components::{board::Board, rule::{Rule, Delta}, state::State};
 use super::components::error::OutOfBoundsSetError;
 
-
 /// A struct that represents a cellular automaton.
 /// 
 /// The automaton contains a board of cells, a set of rules, a neighbourhood, and the current time step.
@@ -89,16 +88,16 @@ impl<'a, S: State> Automaton<'a, S> {
     /// 
     /// A `Result` containing an error if the rules could not be applied.
     fn apply_rules(&mut self) -> Result<(), OutOfBoundsSetError> {
-        let mut deltas: Vec<Delta<S>> = Vec::new();
-        
-        self.rules.iter().for_each(|rule| {
-            self.board.iter_coords().for_each(|coord| {
-                let deltas_result: Result<Vec<Delta<S>>, OutOfBoundsSetError> = rule.delta(coord, self.board);
-                if let Ok(d) = deltas_result {
-                    deltas.extend(d);
-                }
-            });
-        });
+        if self.rules.is_empty() {
+            return Ok(());
+        }
+
+        let deltas: Vec<Delta<S>> = self.rules.iter().flat_map(|rule| {
+            self.board.iter_coords().filter_map(|coord| {
+                rule.delta(coord, self.board).ok()
+            }).flatten()
+        }).collect::<Vec<Delta<S>>>();
+    
 
         deltas.iter().for_each(|delta| {
             let _ = delta.apply(self.board);
