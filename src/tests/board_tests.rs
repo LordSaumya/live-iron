@@ -132,7 +132,24 @@ fn test_board_set_no_panic() {
 }
 
 #[test]
-fn test_board_set_out_of_bounds() {
+fn test_board_set_out_of_bounds_fixed() {
+    let initial_state: Vec<Vec<GameOfLifeState>> = vec![
+        vec![0, 1, 0],
+        vec![1, 0, 1],
+        vec![0, 1, 0],
+    ].iter().map(|x| x.iter().map(|&y| match y {
+        0 => GameOfLifeState::Dead,
+        1 => GameOfLifeState::Alive,
+        _ => panic!("Invalid state"),
+    }).collect()).collect();
+
+    let mut board: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
+
+    assert!(board.set(3, 3, GameOfLifeState::Dead).unwrap_err() == OutOfBoundsSetError { x: 3, y: 3, width: 3, height: 3 });
+}
+
+#[test]
+fn test_board_set_out_of_bounds_periodic() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0],
         vec![1, 0, 1],
@@ -145,7 +162,9 @@ fn test_board_set_out_of_bounds() {
 
     let mut board: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
 
-    assert!(board.set(3, 3, GameOfLifeState::Dead).unwrap_err() == OutOfBoundsSetError { x: 3, y: 3, width: 3, height: 3 });
+    board.set(3, 3, GameOfLifeState::Alive).unwrap();
+
+    assert!(board.get(0, 0).unwrap() == GameOfLifeState::Alive);
 }
 
 #[test]

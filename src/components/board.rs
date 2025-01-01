@@ -82,7 +82,7 @@ impl<S: State> Board<S> {
         }
     }
 
-    /// Set the state of a cell on the board.
+    /// Set the state of a cell on the board. Wraps around the edges if the boundary condition is periodic.
     /// 
     /// # Arguments
     /// 
@@ -92,13 +92,22 @@ impl<S: State> Board<S> {
     /// 
     /// # Returns
     /// 
-    /// An error if the coordinates are out of bounds.
+    /// An error if the coordinates are out of bounds for a fixed boundary condition.
     #[inline(always)]
     pub fn set(&mut self, x: usize, y: usize, state: S) -> Result<(), OutOfBoundsSetError> {
-        if x < self.dim.0 && y < self.dim.1 {
-            self.cells[y * self.dim.0 + x] = state;
-        } else {
-            return Err(OutOfBoundsSetError { x, y, width: self.dim.0, height: self.dim.1 });
+        match self.boundary_condition {
+            BoundaryCondition::Periodic => {
+                let x: usize = x % self.dim.0;
+                let y: usize = y % self.dim.1;
+                self.cells[y * self.dim.0 + x] = state;
+            }
+            BoundaryCondition::Fixed(_fixed_state) => {
+                if x < self.dim.0 && y < self.dim.1 {
+                    self.cells[y * self.dim.0 + x] = state;
+                } else {
+                    return Err(OutOfBoundsSetError { x, y, width: self.dim.0, height: self.dim.1 });
+                }
+            }
         }
         Ok(())
     }
