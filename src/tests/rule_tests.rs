@@ -15,7 +15,7 @@ fn test_rule_game_of_life_underpopulation() {
 
     let mut board: Board<GameOfLifeState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: GameOfLifeRule = GameOfLifeRule;
+    let mut rule: GameOfLifeRule = GameOfLifeRule;
     let result: Vec<Delta<GameOfLifeState>> = rule.delta((1, 1), &mut board).unwrap();
 
     // alive + 1 neighbour => death
@@ -33,7 +33,7 @@ fn test_rule_game_of_life_survival() {
 
     let mut board: Board<GameOfLifeState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: GameOfLifeRule = GameOfLifeRule;
+    let mut rule: GameOfLifeRule = GameOfLifeRule;
     let result:Vec<Delta<GameOfLifeState>> = rule.delta((1, 1), &mut board).unwrap();
 
     // alive + 2 or 3 neighbours => survival
@@ -51,7 +51,7 @@ fn test_rule_game_of_life_overpopulation() {
 
     let mut board: Board<GameOfLifeState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: GameOfLifeRule = GameOfLifeRule;
+    let mut rule: GameOfLifeRule = GameOfLifeRule;
     let result:Vec<Delta<GameOfLifeState>> = rule.delta((1, 1), &mut board).unwrap();
 
     // alive + 4 neighbours => death
@@ -69,7 +69,7 @@ fn test_rule_game_of_life_reproduction() {
 
     let mut board: Board<GameOfLifeState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: GameOfLifeRule = GameOfLifeRule;
+    let mut rule: GameOfLifeRule = GameOfLifeRule;
     let result:Vec<Delta<GameOfLifeState>> = rule.delta((1, 1), &mut board).unwrap();
 
     // dead + 3 neighbours => reproduction
@@ -101,7 +101,7 @@ fn test_rule_langtons_ant_no_change() {
 
     let mut board: Board<LangtonsAntState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: LangtonsAntRule = LangtonsAntRule;
+    let mut rule: LangtonsAntRule = LangtonsAntRule;
     let result:Vec<Delta<LangtonsAntState>> = rule.delta((0, 0), &mut board).unwrap();
 
     // ant not present => one delta with no change
@@ -136,7 +136,7 @@ fn test_rule_langtons_ant_turn_right() {
 
     let mut board: Board<LangtonsAntState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: LangtonsAntRule = LangtonsAntRule;
+    let mut rule: LangtonsAntRule = LangtonsAntRule;
     let result:Vec<Delta<LangtonsAntState>> = rule.delta((1, 1), &mut board).unwrap();
 
     // Old cell: ant no longer present, white cell => black cell
@@ -178,7 +178,7 @@ fn test_rule_langtons_ant_turn_left() {
 
     let mut board: Board<LangtonsAntState> = Board::new(initial_state, BoundaryCondition::Periodic);
 
-    let rule: LangtonsAntRule = LangtonsAntRule;
+    let mut rule: LangtonsAntRule = LangtonsAntRule;
     let result:Vec<Delta<LangtonsAntState>> = rule.delta((1, 1), &mut board).unwrap();
 
     // Old cell: ant no longer present, white cell => black cell

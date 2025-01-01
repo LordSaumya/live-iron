@@ -91,13 +91,14 @@ impl<'a, S: State> Automaton<'a, S> {
         if self.rules.is_empty() {
             return Ok(());
         }
-
-        let deltas: Vec<Delta<S>> = self.rules.iter().flat_map(|rule| {
-            self.board.iter_coords().filter_map(|coord| {
-                rule.delta(coord, self.board).ok()
-            }).flatten()
-        }).collect::<Vec<Delta<S>>>();
     
+        let mut deltas: Vec<Delta<S>> = Vec::new();
+        for rule in self.rules.iter_mut() {
+            for coord in self.board.iter_coords() {
+                let delta = rule.delta(coord, self.board)?;
+                deltas.extend(delta);
+            }
+        }
 
         deltas.iter().for_each(|delta| {
             let _ = delta.apply(self.board);

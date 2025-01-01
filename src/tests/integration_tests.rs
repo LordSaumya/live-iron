@@ -26,7 +26,7 @@ fn test_forest_fire_ca() {
     }
 
     impl Rule<ForestFireState> for ForestFireRule {
-        fn delta(&self, coords: (usize, usize), board: &Board<ForestFireState>) -> Result<Vec<Delta<ForestFireState>>, OutOfBoundsSetError> {
+        fn delta(&mut self, coords: (usize, usize), board: &Board<ForestFireState>) -> Result<Vec<Delta<ForestFireState>>, OutOfBoundsSetError> {
             let mut rng = rand::thread_rng();
             let mut deltas: Vec<Delta<ForestFireState>> = Vec::new();
             let state: ForestFireState = board.get(coords.0, coords.1).unwrap();
