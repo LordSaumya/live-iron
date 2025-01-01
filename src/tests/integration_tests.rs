@@ -53,6 +53,7 @@ fn test_forest_fire_ca() {
     // Define initial state
     let initial_state: Vec<Vec<ForestFireState>> = vec![vec![ForestFireState::Empty; 10]; 10];
     let mut board: Board<ForestFireState> = Board::new(initial_state, BoundaryCondition::Fixed(ForestFireState::Empty));
+    let _ = board.set(5, 5, ForestFireState::Burning).unwrap();
 
     // Define rules vector
     let rules: Vec<Box<dyn Rule<ForestFireState>>> = vec![];
@@ -72,10 +73,10 @@ fn test_forest_fire_ca() {
     // Create automaton
     let mut automaton: Automaton<ForestFireState> = Automaton::new(&mut board, rules);
 
-     // Add rule to automaton
-     let forest_fire_rule = ForestFireRule {
-        burn_prob: 0.01,
-        grow_prob: 0.3,
+     // Add rule to automaton (probabilities are set to 0.0 and 1.0 for testing predictability)
+     let forest_fire_rule: ForestFireRule = ForestFireRule {
+        burn_prob: 0.0,
+        grow_prob: 1.0,
     };
     automaton.add_rule(Box::new(forest_fire_rule));
     println!("{:?}", automaton.rules().len());
