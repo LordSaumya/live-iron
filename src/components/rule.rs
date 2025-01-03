@@ -84,7 +84,7 @@ pub mod common_rules {
             board: &Board<GameOfLifeState>,
         ) -> Result<Vec<Delta<GameOfLifeState>>, OutOfBoundsSetError> {
             let mut num_alive: u16 = 0;
-            let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
+            let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
 
             let curr_state: GameOfLifeState = board
                 .get(coord.0, coord.1)
