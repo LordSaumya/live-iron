@@ -13,6 +13,15 @@ pub enum BoundaryCondition<S: State> {
     Fixed(S),
 }
 
+impl<S: State> std::fmt::Display for BoundaryCondition<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BoundaryCondition::Periodic => write!(f, "Periodic"),
+            BoundaryCondition::Fixed(s ) => write!(f, "Fixed({:?})", s),
+        }
+    }
+}
+
 /// A struct that represents a board of cells in a cellular automaton.
 /// 
 /// The board contains a vector of cells and the dimensions of the board.
