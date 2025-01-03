@@ -7,7 +7,7 @@ fn test_neighbourhood_new_no_panic() {
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_von_neumann_non_edge_rad_1() {
+fn test_neighbourhood_get_neighbourhood_coords_von_neumann_non_edge_rad_1() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -22,7 +22,7 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_non_edge_rad_1() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
 
     let expected_neighbourhood_p: Vec<Option<(usize, usize)>> = vec![
         Some((0, 1)),
@@ -40,12 +40,12 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_non_edge_rad_1() {
         Some((2, 1)),
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 1, 1), expected_neighbourhood_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 1, 1), expected_neighbourhood_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 1, 1), expected_neighbourhood_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 1, 1), expected_neighbourhood_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_von_neumann_edge_rad_1() {
+fn test_neighbourhood_get_neighbourhood_coords_von_neumann_edge_rad_1() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -60,7 +60,7 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_edge_rad_1() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
 
     let expected_neighbourhood_p: Vec<Option<(usize, usize)>> = vec![
         Some((4, 0)),
@@ -79,12 +79,12 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_edge_rad_1() {
     ];
 
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 0, 0), expected_neighbourhood_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 0, 0), expected_neighbourhood_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 0, 0), expected_neighbourhood_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 0, 0), expected_neighbourhood_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_von_neumann_non_edge_rad_2() {
+fn test_neighbourhood_get_neighbourhood_coords_von_neumann_non_edge_rad_2() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -99,7 +99,7 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_non_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
 
     let expected_neighbourhood_bc_p: Vec<Option<(usize, usize)>> = vec![
         Some((4, 1)),
@@ -133,12 +133,12 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_non_edge_rad_2() {
         Some((3, 1))
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 1, 1), expected_neighbourhood_bc_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 1, 1), expected_neighbourhood_bc_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 1, 1), expected_neighbourhood_bc_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 1, 1), expected_neighbourhood_bc_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_von_neumann_edge_rad_2() {
+fn test_neighbourhood_get_neighbourhood_coords_von_neumann_edge_rad_2() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -153,7 +153,7 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
 
     let expected_neighbourhood_p: Vec<Option<(usize, usize)>> = vec![
         Some((3, 0)),
@@ -187,12 +187,12 @@ fn test_neighbourhood_get_neighbourhood_von_neumann_edge_rad_2() {
         Some((2, 0))
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 0, 0), expected_neighbourhood_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 0, 0), expected_neighbourhood_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 0, 0), expected_neighbourhood_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 0, 0), expected_neighbourhood_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_moore_non_edge_rad_1() {
+fn test_neighbourhood_get_neighbourhood_coords_moore_non_edge_rad_1() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -205,7 +205,7 @@ fn test_neighbourhood_get_neighbourhood_moore_non_edge_rad_1() {
         _ => panic!("Invalid state"),
     }).collect()).collect();
 
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
 
@@ -233,12 +233,12 @@ fn test_neighbourhood_get_neighbourhood_moore_non_edge_rad_1() {
         Some((2, 2)),
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 1, 1), expected_neighbourhood_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 1, 1), expected_neighbourhood_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 1, 1), expected_neighbourhood_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 1, 1), expected_neighbourhood_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_moore_edge_rad_1() {
+fn test_neighbourhood_get_neighbourhood_coords_moore_edge_rad_1() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -251,7 +251,7 @@ fn test_neighbourhood_get_neighbourhood_moore_edge_rad_1() {
         _ => panic!("Invalid state"),
     }).collect()).collect();
 
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
 
@@ -279,12 +279,12 @@ fn test_neighbourhood_get_neighbourhood_moore_edge_rad_1() {
         Some((1, 1)),
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 0, 0), expected_neighbourhood_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 0, 0), expected_neighbourhood_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 0, 0), expected_neighbourhood_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 0, 0), expected_neighbourhood_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_moore_non_edge_rad_2() {
+fn test_neighbourhood_get_neighbourhood_coords_moore_non_edge_rad_2() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -299,7 +299,7 @@ fn test_neighbourhood_get_neighbourhood_moore_non_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
 
     let expected_neighbourhood_bc_p: Vec<Option<(usize, usize)>> = vec![
         Some((4, 4)),
@@ -357,12 +357,12 @@ fn test_neighbourhood_get_neighbourhood_moore_non_edge_rad_2() {
         Some((3, 3)),
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 1, 1), expected_neighbourhood_bc_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 1, 1), expected_neighbourhood_bc_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 1, 1), expected_neighbourhood_bc_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 1, 1), expected_neighbourhood_bc_f);
 }
 
 #[test]
-fn test_neighbourhood_get_neighbourhood_moore_edge_rad_2() {
+fn test_neighbourhood_get_neighbourhood_coords_moore_edge_rad_2() {
     let initial_state: Vec<Vec<GameOfLifeState>> = vec![
         vec![0, 1, 0, 1, 0],
         vec![1, 0, 1, 0, 1],
@@ -377,7 +377,7 @@ fn test_neighbourhood_get_neighbourhood_moore_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
 
     let expected_neighbourhood_p: Vec<Option<(usize, usize)>> = vec![
         Some((3, 3)),
@@ -435,8 +435,8 @@ fn test_neighbourhood_get_neighbourhood_moore_edge_rad_2() {
         Some((2, 2)),
     ];
 
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_p, 0, 0), expected_neighbourhood_p);
-    assert_eq!(neighbourhood.get_neighbourhood(&board_bc_f, 0, 0), expected_neighbourhood_f);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_p, 0, 0), expected_neighbourhood_p);
+    assert_eq!(neighbourhood.get_neighbourhood_coords(&board_bc_f, 0, 0), expected_neighbourhood_f);
 }
 
 #[test]
@@ -455,7 +455,7 @@ fn test_neighbourhood_get_neighbourhood_states_von_neumann_non_edge_rad_1() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
 
     let expected_neighbourhood_states_p: Vec<Option<GameOfLifeState>> = vec![
         Some(GameOfLifeState::Alive),
@@ -493,7 +493,7 @@ fn test_neighbourhood_get_neighbourhood_states_von_neumann_edge_rad_1() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 1);
 
     let expected_neighbourhood_states_p: Vec<Option<GameOfLifeState>> = vec![
         Some(GameOfLifeState::Dead),
@@ -531,7 +531,7 @@ fn test_neighbourhood_get_neighbourhood_states_von_neumann_non_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
 
     let expected_neighbourhood_states_bc_p: Vec<Option<GameOfLifeState>> = vec![
         Some(GameOfLifeState::Alive),
@@ -585,7 +585,7 @@ fn test_neighbourhood_get_neighbourhood_states_von_neumann_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::VonNeumann, 2);
 
     let expected_neighbourhood_states_p: Vec<Option<GameOfLifeState>> = vec![
         Some(GameOfLifeState::Alive),
@@ -637,7 +637,7 @@ fn test_neighbourhood_get_neighbourhood_states_moore_non_edge_rad_1() {
         _ => panic!("Invalid state"),
     }).collect()).collect();
 
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
 
@@ -683,7 +683,7 @@ fn test_neighbourhood_get_neighbourhood_states_moore_edge_rad_1() {
         _ => panic!("Invalid state"),
     }).collect()).collect();
 
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 1);
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
 
@@ -731,7 +731,7 @@ fn test_neighbourhood_get_neighbourhood_states_moore_non_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
 
     let expected_neighbourhood_states_bc_p: Vec<Option<GameOfLifeState>> = vec![
         Some(GameOfLifeState::Dead),
@@ -809,7 +809,7 @@ fn test_neighbourhood_get_neighbourhood_states_moore_edge_rad_2() {
 
     let board_bc_p: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Periodic);
     let board_bc_f: Board<GameOfLifeState> = Board::new(initial_state.clone(), BoundaryCondition::Fixed(GameOfLifeState::Dead));
-    let neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
+    let mut neighbourhood: Neighbourhood = Neighbourhood::new(NeighbourhoodType::Moore, 2);
 
     let expected_neighbourhood_states_p: Vec<Option<GameOfLifeState>> = vec![
         Some(GameOfLifeState::Dead),
