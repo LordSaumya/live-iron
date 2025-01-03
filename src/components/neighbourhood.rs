@@ -175,4 +175,45 @@ impl Neighbourhood {
         });
         neighbourhood_states
     }
+
+    /// Get the states and relative coordinates of the cells in the neighbourhood of a cell on a board.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `board`: The board to get the neighbourhood states and coordinates from.
+    /// - `x`: The x-coordinate of the cell.
+    /// - `y`: The y-coordinate of the cell.
+    /// 
+    /// # Type Parameters
+    /// 
+    /// - `S`: The type of state that each cell in the board can have.
+    /// 
+    /// # Returns
+    /// 
+    /// A vector of tuples containing the states and relative coordinates of the cells in the neighbourhood.
+    pub fn get_neighbourhood_states_coords<S: State>(
+        &mut self,
+        board: &Board<S>,
+        x: usize,
+        y: usize,
+    ) -> Vec<(Option<S>, (isize, isize))> {
+        let neighbours: Vec<Option<(usize, usize)>> = self.get_neighbourhood_coords(board, x, y);
+        let mut neighbourhood_states_and_coords: Vec<(Option<S>, (isize, isize))> =
+            Vec::with_capacity(neighbours.len());
+
+        for (_i, n) in neighbours.iter().enumerate() {
+            match n {
+                Some((nx, ny)) => {
+                    let dx = *nx as isize - x as isize;
+                    let dy = *ny as isize - y as isize;
+                    neighbourhood_states_and_coords.push((board.get(nx.to_owned(), ny.to_owned()), (dx, dy)));
+                }
+                None => match board.boundary_condition() {
+                    BoundaryCondition::Fixed(val) => neighbourhood_states_and_coords.push((Some(val), (0, 0))),
+                    _ => neighbourhood_states_and_coords.push((None, (0, 0))),
+                },
+            }
+        }
+        neighbourhood_states_and_coords
+    }
 }
