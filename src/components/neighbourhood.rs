@@ -1,5 +1,6 @@
 use super::board::{Board, BoundaryCondition};
 use super::state::State;
+use std::collections::HashMap;
 
 /// The type of neighbourhood to use for a cellular automaton, which determines the cells to consider when updating a cell.
 ///
@@ -18,9 +19,19 @@ pub enum NeighbourhoodType {
 ///
 /// - `neighbourhood_type`: The type of neighbourhood to use.
 /// - `radius`: The radius of the neighbourhood.
+/// 
+/// # Warning
+/// 
+/// Sharing a neighbourhood instance between multiple boards can lead to unexpected behaviour due to caching.
 pub struct Neighbourhood {
+    /// The type of neighbourhood to use.
     pub neighbourhood_type: NeighbourhoodType,
+    /// The radius of the neighbourhood.
     pub radius: usize,
+    /// Cache of the dimensions and boundary type of the board
+    board_cache: ((usize, usize), String),
+    /// Cache of the neighbourhoods of each cell
+    neighbour_cache: HashMap<(usize, usize), Vec<Option<(usize, usize)>>>,
 }
 
 impl Neighbourhood {
@@ -29,6 +40,8 @@ impl Neighbourhood {
         Self {
             neighbourhood_type,
             radius,
+            board_cache: ((0, 0), String::new()),
+            neighbour_cache: HashMap::new(),
         }
     }
 
@@ -47,8 +60,8 @@ impl Neighbourhood {
     /// # Returns
     ///
     /// A vector of the coordinates of the cells in the neighbourhood.
-    pub fn get_neighbourhood<S: State>(
-        &self,
+    pub fn get_neighbourhood_coords<S: State>(
+        &mut self,
         board: &Board<S>,
         x: usize,
         y: usize,
@@ -57,6 +70,19 @@ impl Neighbourhood {
         let mut neighbourhood: Vec<Option<(usize, usize)>> =
             Vec::with_capacity((2 * self.radius + 1) * (2 * self.radius + 1) - 1);
         let (width, height) = (board.width(), board.height());
+
+        // Clear the cache if the board dimensions have changed
+        if self.board_cache != ((width, height), boundary_condition.to_string()) {
+            println!("Cache cleared for {:#?}", self.board_cache);
+            self.neighbour_cache.clear();
+            self.board_cache = ((width, height), boundary_condition.to_string());
+        }
+
+        // Check if the neighbourhood is in the cache. If it is, return the cached neighbourhood.
+        if let Some(neighbours) = self.neighbour_cache.get(&(x, y)) {
+            println!("Cache accessed for {:#?}", self.board_cache);
+            return neighbours.clone();
+        }
 
         match self.neighbourhood_type {
             NeighbourhoodType::VonNeumann => {
@@ -107,6 +133,8 @@ impl Neighbourhood {
                 }
             }
         }
+
+        self.neighbour_cache.insert((x, y), neighbourhood.clone());
         neighbourhood
     }
 
@@ -128,12 +156,12 @@ impl Neighbourhood {
     /// If a cell is out of bounds, the state will be `None`.
     /// The order of the states is the same as the order of the cells in the neighbourhood.
     pub fn get_neighbourhood_states<S: State>(
-        &self,
+        &mut self,
         board: &Board<S>,
         x: usize,
         y: usize,
     ) -> Vec<Option<S>> {
-        let neighbours: Vec<Option<(usize, usize)>> = self.get_neighbourhood(board, x, y);
+        let neighbours: Vec<Option<(usize, usize)>> = self.get_neighbourhood_coords(board, x, y);
         let mut neighbourhood_states: Vec<Option<S>> = Vec::with_capacity(neighbours.len());
 
         neighbours.iter().for_each(|n| match n {
