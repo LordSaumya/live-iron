@@ -134,8 +134,6 @@ fn test_genetic_ca() {
             let delta_remove: Delta<GeneticState> = Delta::new(coords.0, coords.1, GeneticState::Empty);
             let delta_move: Delta<GeneticState> = Delta::new(coords.0 + weights[0] as usize, coords.1 + weights[1] as usize, state);
 
-            println!("Moved {:?} from {:?} -> {:?}", state, coords, (coords.0 + weights[0] as usize, coords.1 + weights[1] as usize));
-
             // Evolve weights
             let _ = self.evolve(state);
 
@@ -156,8 +154,6 @@ fn test_genetic_ca() {
             } else if sum > 2.0 {
                 self.weights.get_mut(&state).unwrap().iter_mut().for_each(|weight| *weight -= 0.5);
             }
-
-            println!("Evolved {:?} weights to {:?}", state, self.weights[&state]);
 
             Ok(())
         }

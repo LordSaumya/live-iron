@@ -73,14 +73,12 @@ impl Neighbourhood {
 
         // Clear the cache if the board dimensions have changed
         if self.board_cache != ((width, height), boundary_condition.to_string()) {
-            println!("Cache cleared for {:#?}", self.board_cache);
             self.neighbour_cache.clear();
             self.board_cache = ((width, height), boundary_condition.to_string());
         }
 
         // Check if the neighbourhood is in the cache. If it is, return the cached neighbourhood.
         if let Some(neighbours) = self.neighbour_cache.get(&(x, y)) {
-            println!("Cache accessed for {:#?}", self.board_cache);
             return neighbours.clone();
         }
 
