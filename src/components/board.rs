@@ -138,6 +138,55 @@ impl<S: State> Board<S> {
     }
 }
 
+impl<S: State> std::fmt::Display for Board<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Collect all cells into a 2D array of strings
+        let mut lines: Vec<Vec<String>> = Vec::new();
+        for y in 0..self.dim.1 {
+            let mut row: Vec<String> = Vec::new();
+            for x in 0..self.dim.0 {
+                row.push(format!("{:?}", self.get(x, y).unwrap()));
+            }
+            lines.push(row);
+        }
+
+        // Find the maximum width
+        let max_width = lines.iter()
+            .flat_map(|row| row.iter())
+            .map(|s| s.len())
+            .max()
+            .unwrap_or(1);
+
+        // Print rows with borders
+        for row in &lines {
+            // Top border
+            write!(f, "+")?;
+            for _ in row {
+                write!(f, "{:-<width$}+", "", width = max_width + 2)?;
+            }
+            writeln!(f)?;
+
+            // Cell contents
+            write!(f, "|")?;
+            for cell in row {
+                write!(f, " {:>width$} |", cell, width = max_width)?;
+            }
+            writeln!(f)?;
+        }
+
+        // Bottom border
+        if let Some(row) = lines.first() {
+            write!(f, "+")?;
+            for _ in row {
+                write!(f, "{:-<width$}+", "", width = max_width + 2)?;
+            }
+            writeln!(f)?;
+        }
+
+        Ok(())
+    }
+}
+
 /// An iterator over the coordinates of a board.
 /// 
 /// The iterator yields tuples of the form `(x, y)`.
