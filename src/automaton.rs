@@ -138,4 +138,27 @@ impl<'a, S: State> Automaton<'a, S> {
         }
         Ok(())
     }
+
+    /// Advance the automaton by the given number of time steps and print the board at each time step.
+    /// 
+    /// The automaton applies the rules to the board and increments the time step by the given number.
+    /// Rules are applied in the order they are stored. The board is printed at each time step.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `steps`: The number of time steps to advance the automaton.
+    /// 
+    /// - `interval`: The number of milliseconds between each time step.
+    /// 
+    /// # Returns
+    /// 
+    /// A `Result` containing an error if the automaton could not be advanced.
+    pub fn evolve_with_print(&mut self, steps: usize, interval: u64) -> Result<(), OutOfBoundsSetError> {
+        for _ in 0..steps {
+            self.advance()?;
+            std::thread::sleep(std::time::Duration::from_millis(interval));
+            println!("{}", self.board);
+        }
+        Ok(())
+    }
 }
