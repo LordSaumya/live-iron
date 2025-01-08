@@ -137,3 +137,20 @@ fn test_automaton_evolve_game_of_life_ten_steps() {
     assert_eq!(automaton.board(), &expected_board);
     assert_eq!(automaton.curr_time(), 10);
 }
+
+#[test]
+fn test_automaton_evolve_with_print_game_of_life_ten_steps() {
+    let initial_state: Vec<Vec<GameOfLifeState>> = vec![
+        vec![GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead],
+        vec![GameOfLifeState::Alive, GameOfLifeState::Alive, GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead],
+        vec![GameOfLifeState::Dead, GameOfLifeState::Alive, GameOfLifeState::Alive, GameOfLifeState::Dead, GameOfLifeState::Dead],
+        vec![GameOfLifeState::Dead, GameOfLifeState::Alive, GameOfLifeState::Alive, GameOfLifeState::Dead, GameOfLifeState::Dead],
+        vec![GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead, GameOfLifeState::Dead],
+    ];
+    let mut board: Board<GameOfLifeState> = Board::new(initial_state, BoundaryCondition::Periodic);
+    let rules: Vec<Box<dyn Rule<GameOfLifeState>>> = vec![Box::new(GameOfLifeRule {})];
+    let mut automaton: Automaton<'_, GameOfLifeState> = Automaton::new(&mut board, rules);
+
+    let _ = automaton.evolve_with_print(10, 20).unwrap();
+    assert_eq!(automaton.curr_time(), 10);
+}
