@@ -17,7 +17,7 @@ impl<S: State> std::fmt::Display for BoundaryCondition<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             BoundaryCondition::Periodic => write!(f, "Periodic"),
-            BoundaryCondition::Fixed(s ) => write!(f, "Fixed({:?})", s),
+            BoundaryCondition::Fixed(s) => write!(f, "Fixed({:?})", s),
         }
     }
 }
