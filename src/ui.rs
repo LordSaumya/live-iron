@@ -2,6 +2,7 @@ use crate::{automaton::Automaton, components::board::{BoardRepresentation, Colou
 use crate::components::state::State;
 use dioxus::prelude::*;
 use tokio::time::Interval;
+use std::sync::Arc;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -9,7 +10,7 @@ const MAIN_CSS: Asset = asset!("/assets/main.css");
 /// A private struct that represents the render context for the simulation.
 #[derive(Debug, Clone)]
 struct BoardSimulationRender {
-    board_states: Vec<BoardRepresentation>,
+    states: Arc<Vec<BoardRepresentation>>,
     steps: usize,
     interval: u64,
 }
@@ -27,20 +28,31 @@ struct BoardSimulationRender {
 /// 
 /// - `interval`: The interval between each step in milliseconds.
 pub fn simulate<S: State + Into<Colour>>(automaton: &mut Automaton<S>, steps: usize, interval: u64) {
-
-    let mut board_representations: Vec<BoardRepresentation> = Vec::new();
-
+    // Create a vector to store all board states
+    let mut state_vec = Vec::with_capacity(steps + 1);
+    
+    // Store the initial state
+    state_vec.push(automaton.board().to_representation());
+    
+    // Pre-compute all states upfront
     for _ in 0..steps {
-        automaton.evolve(1).unwrap();
-        board_representations.push(automaton.board().to_representation());
+        // Evolve the automaton
+        if let Ok(_) = automaton.evolve(1) {
+            let new_state = automaton.board().to_representation();
+            state_vec.push(new_state);
+        }
     }
-
-    let render: BoardSimulationRender = BoardSimulationRender {
-        board_states: board_representations,
+    
+    // Wrap in Arc for thread-safe sharing
+    let states = Arc::new(state_vec);
+    
+    // Prepare the render context
+    let render = BoardSimulationRender {
+        states,
         steps,
         interval,
     };
-
+    
     dioxus::LaunchBuilder::new().with_context(render).launch(App);
 }
 
@@ -69,10 +81,10 @@ fn board_cell(colour: Colour) -> Element {
 pub fn board_table(board_state: BoardRepresentation) -> Element {
     rsx! {
         table { class: "board",
-            for row in board_state {
-                tr {
-                    for cell in row {
-                        board_cell { colour: cell }
+            for (row_idx, row) in board_state.iter().enumerate() {
+                tr { key: "{row_idx}",
+                    for (cell_idx, cell) in row.iter().enumerate() {
+                        board_cell { key: "{cell_idx}", colour: *cell }
                     }
                 }
             }
@@ -84,32 +96,37 @@ pub fn board_table(board_state: BoardRepresentation) -> Element {
 #[component]
 fn App() -> Element {
     let render: BoardSimulationRender = use_context::<BoardSimulationRender>();
-
-    let mut step: Signal<usize, SyncStorage> = use_signal_sync(|| 1);
-    let mut board_state: Signal<Vec<Vec<Colour>>, SyncStorage> = use_signal_sync(|| render.board_states[0].clone());
-
-    let interval: u64 = render.interval;
-    let steps: usize = render.steps;
-
+    
+    let step: Signal<usize> = use_signal(|| 0);
+    
+    let board_state: BoardRepresentation = {
+        let current_index: usize = step.read().min(render.states.len().saturating_sub(1));
+        render.states.get(current_index).cloned().unwrap_or_default()
+    };
+    
     let _update_task: Coroutine<()> = use_coroutine(move |_rx: UnboundedReceiver<()>| {
-    let board_state_list: Vec<Vec<Vec<Colour>>> = render.board_states.clone();
-    async move {
-        let mut interval: Interval = tokio::time::interval(std::time::Duration::from_millis(interval));
-        interval.tick().await;
-        for i in 1..steps {
-            step.set(i + 1);
-            board_state.set(board_state_list[i].clone());
+        let mut step_clone: Signal<usize> = step.clone();
+        let steps: usize = render.steps;
+        let interval_ms: u64 = render.interval;
+        
+        async move {
+            let mut interval: Interval = tokio::time::interval(std::time::Duration::from_millis(interval_ms));
             interval.tick().await;
+            
+            for i in 1..steps {
+                step_clone.set(i + 1);
+                interval.tick().await;
+            }
         }
-    }});
-
+    });
+    
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
 
         style { {include_str!("../assets/main.css")} }
         h1 {"LiveIron Simulation"}
-        board_table { board_state: board_state.cloned() }
+        board_table { board_state: board_state }
         p { "Step {step}" }
     }
 }
