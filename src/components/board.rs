@@ -187,6 +187,58 @@ impl<S: State> std::fmt::Display for Board<S> {
     }
 }
 
+/// A type alias for a 2D vector of colours representing a board, used for rendering.
+pub type BoardRepresentation = Vec<Vec<Colour>>;
+
+/// A struct representing an RGB colour, used for rendering.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Colour {
+    /// The red component of the colour.
+    pub r: u8,
+    /// The green component of the colour.
+    pub g: u8,
+    /// The blue component of the colour.
+    pub b: u8,
+}
+
+impl Colour {
+    /// Create a new `Colour` with the given red, green, and blue components.
+    pub fn new(r: u8, g: u8, b: u8) -> Self {
+        Self { r, g, b }
+    }
+
+    /// Create a new `Colour` representing white.
+    pub fn white() -> Self {
+        Self {r: 255, g: 255, b: 255 }
+    }
+
+    /// Create a new `Colour` representing black.
+    pub fn black() -> Self {
+        Self { r: 0, g: 0, b: 0 }
+    }
+
+    /// Create a new `Colour` representing red.
+    pub fn red() -> Self {
+        Self { r: 255, g: 0, b: 0 }
+    }
+
+    /// Create a new `Colour` representing green.
+    pub fn green() -> Self {
+        Self { r: 0, g: 255, b: 0 }
+    }
+
+    /// Create a new `Colour` representing blue.
+    pub fn blue() -> Self {
+        Self { r: 0, g: 0, b: 255 }
+    }
+}
+
+impl From<Colour> for String {
+    fn from(colour: Colour) -> String {
+        format!("rgb({}, {}, {})", colour.r, colour.g, colour.b)
+    }
+}
+
 /// An iterator over the coordinates of a board.
 /// 
 /// The iterator yields tuples of the form `(x, y)`.
