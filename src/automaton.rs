@@ -93,9 +93,10 @@ impl<'a, S: State> Automaton<'a, S> {
         }
     
         let mut deltas: Vec<Delta<S>> = Vec::new();
+        let coords: Vec<(usize, usize)> = self.board.iter_coords().collect::<Vec<(usize, usize)>>();
         for rule in self.rules.iter_mut() {
-            for coord in self.board.iter_coords() {
-                let delta = rule.delta(coord, self.board)?;
+            for coord in coords.iter() {
+                let delta = rule.delta(coord.clone(), self.board)?;
                 deltas.extend(delta);
             }
         }
