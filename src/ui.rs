@@ -29,25 +29,25 @@ struct BoardSimulationRender {
 /// - `interval`: The interval between each step in milliseconds.
 pub fn simulate<S: State + Into<Colour>>(automaton: &mut Automaton<S>, steps: usize, interval: u64) {
     // Create a vector to store all board states
-    let mut state_vec = Vec::with_capacity(steps + 1);
+    let mut state_vec: Vec<BoardRepresentation> = Vec::with_capacity(steps + 1);
     
     // Store the initial state
     state_vec.push(automaton.board().to_representation());
     
-    // Pre-compute all states upfront
+    // Precompute all states upfront
     for _ in 0..steps {
         // Evolve the automaton
         if let Ok(_) = automaton.evolve(1) {
-            let new_state = automaton.board().to_representation();
+            let new_state: BoardRepresentation = automaton.board().to_representation();
             state_vec.push(new_state);
         }
     }
     
     // Wrap in Arc for thread-safe sharing
-    let states = Arc::new(state_vec);
+    let states: Arc<Vec<BoardRepresentation>> = Arc::new(state_vec);
     
     // Prepare the render context
-    let render = BoardSimulationRender {
+    let render: BoardSimulationRender = BoardSimulationRender {
         states,
         steps,
         interval,
