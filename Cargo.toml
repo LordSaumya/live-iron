@@ -13,5 +13,23 @@ readme = "README.md"
 [profile.dev.package."*"]
 opt-level = 3
 
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
+
 [dependencies]
+dioxus = { version = "0.6.0", features = [] }
 rand = "0.8.5"
+tokio = "1.44.1"
+
+[features]
+default = ["desktop"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
