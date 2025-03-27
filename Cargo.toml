@@ -1,6 +1,6 @@
 [package]
 name = "live-iron"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 keywords = ["cellular_automata", "genetic_algorithms", "machine_learning", "data_science"]
 categories = ["science"]
