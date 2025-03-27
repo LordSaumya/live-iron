@@ -17,7 +17,7 @@ pub trait Rule<S: State>: Send + Sync {
     /// # Returns
     ///
     /// A vector of deltas to the board, or an error if the coordinates are out of bounds.
-    fn delta(&mut self, coord: (usize, usize), board: &Board<S>) -> Result<Vec<Delta<S>>, OutOfBoundsSetError>;
+    fn delta(&self, coord: (usize, usize), board: &Board<S>) -> Result<Vec<Delta<S>>, OutOfBoundsSetError>;
 }
 
 /// A struct that represents a change to the state of a cell in a cellular automaton.
@@ -79,7 +79,7 @@ pub mod common_rules {
 
     impl Rule<GameOfLifeState> for GameOfLifeRule {
         fn delta (
-            &mut self,
+            &self,
             coord: (usize, usize),
             board: &Board<GameOfLifeState>,
         ) -> Result<Vec<Delta<GameOfLifeState>>, OutOfBoundsSetError> {
@@ -125,7 +125,7 @@ pub mod common_rules {
 
     impl Rule<LangtonsAntState> for LangtonsAntRule {
         fn delta(
-            &mut self,
+            &self,
             coord: (usize, usize),
             board: &Board<LangtonsAntState>,
         ) -> Result<Vec<Delta<LangtonsAntState>>, OutOfBoundsSetError> {
