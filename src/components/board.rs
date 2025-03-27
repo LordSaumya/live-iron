@@ -50,9 +50,23 @@ impl<S: State> Board<S> {
     /// # Arguments
     /// - `initial_state`: The initial state of the cells in the board as a 2D vector.
     pub fn new(initial_state: Vec<Vec<S>>, boundary_condition: BoundaryCondition<S>) -> Self {
+        let width: usize = initial_state[0].len();
+        let height: usize = initial_state.len();
+        
+        // For larger boards, use parallel flattening
+        let cells: Vec<S> = if height * width > 1000 {
+            initial_state
+                .into_par_iter()
+                .flatten()
+                .collect()
+        } else {
+            // For smaller boards, use regular flattening
+            initial_state.into_iter().flatten().collect()
+        };
+        
         Self {
-            dim: (initial_state[0].len(), initial_state.len()),
-            cells: initial_state.into_iter().flatten().collect(),
+            dim: (width, height),
+            cells,
             boundary_condition,
         }
     }
@@ -185,19 +199,21 @@ impl<S: State> Board<S> {
 impl<S: State> std::fmt::Display for Board<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Collect all cells into a 2D array of strings
-        let mut lines: Vec<Vec<String>> = Vec::new();
-        for y in 0..self.dim.1 {
-            let mut row: Vec<String> = Vec::new();
-            for x in 0..self.dim.0 {
-                row.push(format!("{:?}", self.get(x, y).unwrap()));
-            }
-            lines.push(row);
-        }
+        let lines: Vec<Vec<String>> = (0..self.dim.1)
+            .into_par_iter()
+            .map(|y| {
+                let mut row: Vec<String> = Vec::with_capacity(self.dim.0);
+                for x in 0..self.dim.0 {
+                    row.push(format!("{:?}", self.get(x, y).unwrap()));
+                }
+                row
+            })
+            .collect();
 
         // Find the maximum width
         let max_width = lines
-            .iter()
-            .flat_map(|row| row.iter())
+            .par_iter()
+            .flat_map(|row| row.par_iter())
             .map(|s| s.len())
             .max()
             .unwrap_or(1);
