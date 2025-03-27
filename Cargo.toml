@@ -31,6 +31,7 @@ inherits = "dev"
 [dependencies]
 dioxus = { version = "0.6.0", features = [] }
 rand = "0.8.5"
+rayon = "1.10.0"
 tokio = "1.44.1"
 
 [features]

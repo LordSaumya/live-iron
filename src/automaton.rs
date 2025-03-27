@@ -5,6 +5,7 @@ use super::components::{
     state::State,
 };
 use super::ui::simulate;
+use rayon::prelude::*;
 
 /// A struct that represents a cellular automaton.
 ///
@@ -99,11 +100,18 @@ impl<'a, S: State> Automaton<'a, S> {
 
         let mut deltas: Vec<Delta<S>> = Vec::new();
         let coords: Vec<(usize, usize)> = self.board.iter_coords().collect::<Vec<(usize, usize)>>();
-        for rule in self.rules.iter_mut() {
-            for coord in coords.iter() {
-                let delta = rule.delta(coord.clone(), self.board)?;
-                deltas.extend(delta);
-            }
+        for rule in self.rules.iter() {
+            let rule_deltas: Vec<Delta<S>> = coords
+                .par_iter()
+                .filter_map(|coord| {
+                    match rule.delta(coord.clone(), self.board) {
+                        Ok(deltas) => Some(deltas),
+                        Err(_) => None,
+                    }
+                })
+                .flatten()
+                .collect();
+            deltas.extend(rule_deltas);
         }
 
         deltas.iter().for_each(|delta| {
