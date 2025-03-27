@@ -1,5 +1,6 @@
 use super::error::OutOfBoundsSetError;
 use super::state::State;
+use rayon::prelude::*;
 use std::fmt::Debug;
 
 /// The type of boundary condition to use for the board, which determines how to handle cells at the edges of the board.
@@ -152,17 +153,32 @@ impl<S: State> Board<S> {
     /// A 2D vector of colours representing the board.
     pub fn to_representation(&self) -> BoardRepresentation
     where
-        S: Into<Colour>,
+        S: Into<Colour> + Clone,
     {
-        let mut representation: BoardRepresentation = Vec::new();
-        for y in 0..self.dim.1 {
-            let mut row: Vec<Colour> = Vec::new();
-            for x in 0..self.dim.0 {
-                row.push(self.get(x, y).unwrap().into());
-            }
-            representation.push(row);
-        }
-        representation
+        // Threshold for when to use within-row parallelisation
+        const ROW_PARALLELISM_THRESHOLD: usize = 128;
+        let parallelise_rows: bool = self.dim.0 > ROW_PARALLELISM_THRESHOLD;
+
+        (0..self.dim.1)
+            .into_par_iter()
+            .map(|y| {
+                match parallelise_rows {
+                    true => (0..self.dim.0)
+                        // For larger boards, parallelise within rows too
+                        .into_par_iter()
+                        .map(|x| self.get(x, y).unwrap().into())
+                        .collect(),
+                    false => {
+                        // For smaller boards, process rows sequentially (better cache locality)
+                        let mut row = Vec::with_capacity(self.dim.0);
+                        for x in 0..self.dim.0 {
+                            row.push(self.get(x, y).unwrap().into());
+                        }
+                        row
+                    }
+                }
+            })
+            .collect()
     }
 }
 
@@ -238,7 +254,11 @@ impl Colour {
 
     /// Create a new `Colour` representing white.
     pub fn white() -> Self {
-        Self {r: 255, g: 255, b: 255 }
+        Self {
+            r: 255,
+            g: 255,
+            b: 255,
+        }
     }
 
     /// Create a new `Colour` representing black.
