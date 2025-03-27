@@ -27,7 +27,7 @@ fn test_forest_fire_ca() {
     }
 
     impl Rule<ForestFireState> for ForestFireRule {
-        fn delta(&mut self, coords: (usize, usize), board: &Board<ForestFireState>) -> Result<Vec<Delta<ForestFireState>>, OutOfBoundsSetError> {
+        fn delta(&self, coords: (usize, usize), board: &Board<ForestFireState>) -> Result<Vec<Delta<ForestFireState>>, OutOfBoundsSetError> {
             let mut rng = rand::thread_rng();
             let mut deltas: Vec<Delta<ForestFireState>> = Vec::new();
             let state: ForestFireState = board.get(coords.0, coords.1).unwrap();
@@ -101,104 +101,4 @@ fn test_forest_fire_ca() {
     assert_ne!(init_tree_count, final_tree_count);
     assert_ne!(init_burning_count, final_burning_count);
     assert_ne!(init_empty_count, final_empty_count);
-}
-
-#[test]
-fn test_genetic_ca() {
-    // Define GeneticState
-    #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-    enum GeneticState {
-        A,
-        B,
-        Empty,
-    }
-    impl State for GeneticState {}
-
-    // Define GeneticRule
-    struct GeneticRule {
-        weights: HashMap<GeneticState, Vec<f64>>,
-    }
-
-    impl Rule<GeneticState> for GeneticRule {
-        fn delta(&mut self, coords: (usize, usize), board: &Board<GeneticState>) -> Result<Vec<Delta<GeneticState>>, OutOfBoundsSetError> {
-            let state: GeneticState = board.get(coords.0, coords.1).unwrap();
-
-            // Skip if cell is empty
-            if state == GeneticState::Empty {
-                return Ok(vec![]);
-            }
-
-            let weights: &Vec<f64> = &self.weights[&state];
-
-            // Add weights to x and y coordinates to generate delta
-            let delta_remove: Delta<GeneticState> = Delta::new(coords.0, coords.1, GeneticState::Empty);
-            let delta_move: Delta<GeneticState> = Delta::new(coords.0 + weights[0] as usize, coords.1 + weights[1] as usize, state);
-
-            // Evolve weights
-            let _ = self.evolve(state);
-
-            Ok(vec![delta_remove, delta_move])
-        }
-    }
-
-    impl GeneticRule {
-        fn evolve(&mut self, state: GeneticState) -> Result<(), OutOfBoundsSetError> {
-            // For testing purposes, weights evolve according to the following rules:
-            // - If the sum of the weights is less than 2, add 0.5 to each weight.
-            // - If the sum of the weights is greater than 2, subtract 0.5 from each weight.
-            // - If the sum of the weights is equal to 2, do nothing.
-
-            let sum: f64 = self.weights[&state].iter().sum();
-            if sum < 2.0 {
-                self.weights.get_mut(&state).unwrap().iter_mut().for_each(|weight| *weight += 0.5);
-            } else if sum > 2.0 {
-                self.weights.get_mut(&state).unwrap().iter_mut().for_each(|weight| *weight -= 0.5);
-            }
-
-            Ok(())
-        }
-    }
-
-    // Define initial state
-    let initial_state: Vec<Vec<GeneticState>> = vec![vec![GeneticState::Empty; 10]; 10];
-    let mut board: Board<GeneticState> = Board::new(initial_state, BoundaryCondition::Periodic);
-    let _ = board.set(2, 2, GeneticState::A).unwrap();
-    let _ = board.set(6, 1, GeneticState::B).unwrap();
-
-    // Define rules vector
-    let rules: Vec<Box<dyn Rule<GeneticState>>> = vec![];
-
-    // Create automaton
-    let mut automaton: Automaton<GeneticState> = Automaton::new(&mut board, rules);
-
-    // Add rule to automaton
-    let mut weights: HashMap<GeneticState, Vec<f64>> = HashMap::new();
-    weights.insert(GeneticState::A, vec![2.0, 2.0]);
-    weights.insert(GeneticState::B, vec![-0.5, -0.5]);
-
-    let genetic_rule: GeneticRule = GeneticRule {
-        weights
-    };
-    automaton.add_rule(Box::new(genetic_rule));
-
-    // Evolve automaton
-    let _ = automaton.evolve(1);
-
-    // Check positions of A and B after one step
-    assert_eq!(automaton.board().get(4, 4).unwrap(), GeneticState::A);
-    assert_eq!(automaton.board().get(6, 1).unwrap(), GeneticState::B);
-    
-    // Evolve automaton
-    let _ = automaton.evolve(1);
-
-    // Check positions of A and B after two steps
-    assert_eq!(automaton.board().get(5, 5).unwrap(), GeneticState::A);
-    assert_eq!(automaton.board().get(6, 1).unwrap(), GeneticState::B);
-
-    // Evolve automaton
-    let _ = automaton.evolve(2);
-
-    // Check positions of A and B after four steps
-    assert_eq!(automaton.board().get(7, 7).unwrap(), GeneticState::A);
-    assert_eq!(automaton.board().get(7, 2).unwrap(), GeneticState::B);
 }
