@@ -98,7 +98,9 @@ impl<'a, S: State> Automaton<'a, S> {
             return Ok(());
         }
 
-        let mut deltas: Vec<Delta<S>> = Vec::new();
+        let estimated_deltas: usize = self.board.width() * self.board.height() * self.rules.len();
+        let mut deltas: Vec<Delta<S>> = Vec::with_capacity(estimated_deltas);
+
         let coords: Vec<(usize, usize)> = self.board.iter_coords().collect::<Vec<(usize, usize)>>();
         for rule in self.rules.iter() {
             let rule_deltas: Vec<Delta<S>> = coords
