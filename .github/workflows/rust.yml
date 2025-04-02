@@ -24,6 +24,8 @@ jobs:
       with:
         toolchain: stable
         override: true
+    - name: Set up working directory
+      run: cd ${{ github.workspace }}
     - name: Build
       run: cargo build --verbose
     - name: Test
