@@ -2,7 +2,7 @@
 
 ## Description
 
-A Performant cellular automata simulator library with visualisation capabilities built in Rust. The library is designed to be flexible and easy to use, with a focus on performance. It provides a simple API for creating and running cellular automata simulations, as well as visualising them using the `dioxus` library.
+A performant cellular automata simulator library with visualisation capabilities built in Rust. The library is designed to be flexible and easy to use, with a focus on performance. It provides a simple API for creating and running cellular automata simulations, as well as visualising them using the `dioxus` library.
 
 Future plans include adding support for evolving cellular automata using genetic algorithms, as conceptualised by [Mitchell et al](https://www.sciencedirect.com/science/article/abs/pii/0167278994902933).
 
