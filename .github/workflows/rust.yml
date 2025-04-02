@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y libglib2.0-dev
     - name: Set PKG_CONFIG_PATH
@@ -24,8 +26,6 @@ jobs:
       with:
         toolchain: stable
         override: true
-    - name: Set up working directory
-      run: cd ${{ github.workspace }}
     - name: Build
       run: cargo build --verbose
     - name: Test
