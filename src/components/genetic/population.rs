@@ -209,6 +209,27 @@ impl<S: State, G: Genotype<S>> Population<S, G> {
 
         Ok(())
     }
+
+    /// Advance the population by one generation by first shrinking it (removing less fit individuals) and then growing it (adding new offspring).
+    /// 
+    /// # Arguments
+    /// 
+    /// - `death_percentage`: The percentage of the population to remove (0.0 to 1.0).
+    /// - `growth_percentage`: The percentage of the population to add (0.0 to 1.0).
+    /// - `board`: A reference to the board of cells to evaluate the genotypes against.
+    /// 
+    /// # Returns
+    /// 
+    /// A result indicating success or failure.
+    pub fn advance_generation(&mut self, death_percentage: f64, growth_percentage: f64, board: &Board<S>) -> Result<(), String> {
+        // First remove less fit individuals
+        self.shrink_population(death_percentage, board)?;
+        
+        // Then add new offspring
+        self.grow_population(growth_percentage, board)?;
+        
+        Ok(())
+    }
 }
 
 // Implement IntoIterator for Population to allow consuming iteration
