@@ -124,6 +124,15 @@ impl<S: State, G: Genotype<S>> Population<S, G> {
         self.genotypes.len()
     }
 
+    /// Add a child genotype to the population by selecting two parents using the selection strategy and performing crossover and mutation.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `board`: A reference to the board of cells to evaluate the genotypes against.
+    /// 
+    /// # Returns
+    /// 
+    /// A result indicating success or failure.
     pub fn add_child(&mut self, board: &Board<S>) -> Result<(), String> {
         if self.genotypes.is_empty() {
             return Err("Population is empty".to_string());
@@ -142,5 +151,92 @@ impl<S: State, G: Genotype<S>> Population<S, G> {
 
         // Add the child to the population
         Ok(self.genotypes.push(child))
+    }
+
+    /// Kill a percentage of the population based on fitness scores using the selection strategy.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `percentage`: The percentage of the population to kill relative to the current population (0.0 to 1.0).
+    /// - `board`: A reference to the board of cells to evaluate the genotypes against.
+    /// 
+    /// # Returns
+    /// 
+    /// A result indicating success or failure.
+    pub fn shrink_population(&mut self, percentage: f64, board: &Board<S>) -> Result<(), String> {
+        if percentage < 0.0 || percentage > 1.0 {
+            return Err("Percentage must be between 0.0 and 1.0".to_string());
+        }
+
+        if self.genotypes.is_empty() {
+            return Err("Population is empty".to_string());
+        }
+
+        let fitness_scores: Vec<f64> = self.fitness_scores(board);
+        let selected_indices: Vec<usize> = self.selection_strategy.select_deaths(&fitness_scores, percentage);
+        
+        selected_indices.iter().for_each(|&index| {
+            self.genotypes.remove(index);
+        });
+
+        Ok(())
+    }
+
+    /// Grow the population by adding a percentage of new genotypes based on fitness scores using the selection strategy.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `percentage`: The percentage of the population to grow relative to the current population (0.0 to 1.0).
+    /// - `board`: A reference to the board of cells to evaluate the genotypes against.
+    /// 
+    /// # Returns
+    /// 
+    /// A result indicating success or failure.
+    pub fn grow_population(&mut self, percentage: f64, board: &Board<S>) -> Result<(), String> {
+        if percentage < 0.0 || percentage > 1.0 {
+            return Err("Percentage must be between 0.0 and 1.0".to_string());
+        }
+
+        if self.genotypes.is_empty() {
+            return Err("Population is empty".to_string());
+        }
+
+        // Calculate the number of new genotypes to add
+        let num_new_genotypes = (self.genotypes.len() as f64 * percentage).round() as usize;
+        for _ in 0..num_new_genotypes {
+            self.add_child(board)?;
+        }
+
+        Ok(())
+    }
+}
+
+// Implement IntoIterator for Population to allow consuming iteration
+impl<S: State, G: Genotype<S>> IntoIterator for Population<S, G> {
+    type Item = G;
+    type IntoIter = std::vec::IntoIter<G>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.genotypes.into_iter()
+    }
+}
+
+// Implement IntoIterator for &Population to allow immutable iteration
+impl<'a, S: State, G: Genotype<S>> IntoIterator for &'a Population<S, G> {
+    type Item = &'a G;
+    type IntoIter = std::slice::Iter<'a, G>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.genotypes.iter()
+    }
+}
+
+// Implement IntoIterator for &mut Population to allow mutable iteration
+impl<'a, S: State, G: Genotype<S>> IntoIterator for &'a mut Population<S, G> {
+    type Item = &'a mut G;
+    type IntoIter = std::slice::IterMut<'a, G>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.genotypes.iter_mut()
     }
 }
