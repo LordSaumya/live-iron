@@ -1,6 +1,7 @@
 pub mod components;
 pub mod automaton;
-pub mod ui;
+pub mod genetic_automaton;
+mod ui;
 
 #[cfg(test)]
 pub mod tests;
