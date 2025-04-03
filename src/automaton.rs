@@ -9,7 +9,7 @@ use rayon::prelude::*;
 
 /// A struct that represents a cellular automaton.
 ///
-/// The automaton contains a board of cells, a set of rules, a neighbourhood, and the current time step.
+/// The automaton contains a board of cells, a set of rules, and the current time step.
 ///
 /// # Type Parameters
 ///
@@ -31,7 +31,7 @@ pub struct Automaton<'a, S: State> {
 }
 
 impl<'a, S: State> Automaton<'a, S> {
-    /// Create a new `Automaton` with the given board, rules, and neighbourhood.
+    /// Create a new `Automaton` with the given board, and rules.
     ///
     /// # Arguments
     ///
@@ -39,11 +39,9 @@ impl<'a, S: State> Automaton<'a, S> {
     ///
     /// - `rules`: A vector of rules to apply to the board.
     ///
-    /// - `neighbourhood`: The neighbourhood to use for the rules.
-    ///
     /// # Returns
     ///
-    /// A new `Automaton` with the given board, rules, and neighbourhood.
+    /// A new `Automaton` with the given board, and rules.
     pub fn new(board: &'a mut Board<S>, rules: Vec<Box<dyn Rule<S>>>) -> Self {
         Self {
             board,
