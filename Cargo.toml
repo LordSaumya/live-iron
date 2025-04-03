@@ -1,13 +1,13 @@
 [package]
 name = "live-iron"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 keywords = ["cellular_automata", "genetic_algorithms", "machine_learning", "data_science"]
 categories = ["science"]
 authors = ["LordSaumya"]
 license = "MIT"
 repository = "https://github.com/LordSaumya/live-iron"
-description = "A performant, extensible cellular automata library for Rust"
+description = "A performant, extensible cellular and genetic automata library for Rust"
 readme = "README.md"
 
 [lib]
