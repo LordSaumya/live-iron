@@ -1,4 +1,4 @@
-use rand::{Rng, thread_rng};
+use rand::{Rng, thread_rng, seq::SliceRandom};
 use std::fmt::Debug;
 
 /// Methods for selecting parents from a population
@@ -173,14 +173,14 @@ impl SelectionStrategy {
     /// A vector of indices representing the individuals selected for death.
     pub fn select_deaths(&self, fitness_scores: &[f64], percentage: f64) -> Vec<usize> {
         match self {
-            Self::Tournament(size) => self.tournament_selection_death(fitness_scores, *size),
-            Self::RouletteWheel => self.roulette_wheel_selection_death(fitness_scores),
-            Self::Rank(pressure) => self.rank_selection_death(fitness_scores, *pressure),
-            Self::Truncation(percentage) => self.truncation_selection_death(fitness_scores, *percentage),
+            Self::Tournament(size) => self.tournament_selection_death(fitness_scores, *size, percentage),
+            Self::RouletteWheel => self.roulette_wheel_selection_death(fitness_scores, percentage),
+            Self::Rank(pressure) => self.rank_selection_death(fitness_scores, *pressure, percentage),
+            Self::Truncation(trunc_percentage) => self.truncation_selection_death(fitness_scores, *trunc_percentage, percentage),
         }
     }
 
-    fn tournament_selection_death(&self, fitness_scores: &[f64], tournament_size: usize) -> Vec<usize> {
+    fn tournament_selection_death(&self, fitness_scores: &[f64], tournament_size: usize, percentage: f64) -> Vec<usize> {
         let mut rng: rand::prelude::ThreadRng = thread_rng();
         let population_size: usize = fitness_scores.len();
         
@@ -200,5 +200,91 @@ impl SelectionStrategy {
         // Select the worst individuals for death
         let num_deaths: usize = (population_size as f64 * (1.0 - percentage)).round() as usize;
         best_indices[num_deaths..].to_vec()
+    }
+
+    fn roulette_wheel_selection_death(&self, fitness_scores: &[f64], percentage: f64) -> Vec<usize> {
+        let mut rng: rand::prelude::ThreadRng = thread_rng();
+        let total_fitness: f64 = fitness_scores.iter().sum();
+        
+        // Select individuals for death based on fitness scores
+        let mut selected_indices: Vec<usize> = Vec::new();
+        let num_deaths: usize = (fitness_scores.len() as f64 * (1.0 - percentage)).round() as usize;
+        
+        for _ in 0..num_deaths {
+            let mut spin: f64 = rng.gen_range(0.0..total_fitness);
+            let mut parent: usize = 0;
+            
+            for (i, fitness) in fitness_scores.iter().enumerate() {
+                spin -= fitness;
+                if spin <= 0.0 {
+                    parent = i;
+                    break;
+                }
+            }
+            
+            selected_indices.push(parent);
+        }
+        
+        selected_indices
+    }
+
+    fn rank_selection_death(&self, fitness_scores: &[f64], selection_pressure: f64, percentage: f64) -> Vec<usize> {
+        let mut rng: rand::prelude::ThreadRng = thread_rng();
+        let n: usize = fitness_scores.len();
+        
+        // Rank individuals by fitness scores
+        let mut ranked_indices: Vec<usize> = (0..n).collect();
+        ranked_indices.sort_by(|&a, &b| fitness_scores[b].partial_cmp(&fitness_scores[a]).unwrap());
+        
+        // Calculate selection probabilities based on ranks
+        let total_rank: f64 = (1..=n).map(|i| i as f64).sum();
+        let probabilities: Vec<f64> = ranked_indices.iter()
+            .map(|&idx| (n - idx) as f64 / total_rank * selection_pressure)
+            .collect();
+        
+        // Select individuals for death based on probabilities
+        let num_deaths: usize = (n as f64 * (1.0 - percentage)).round() as usize;
+        let mut selected_indices: Vec<usize> = Vec::new();
+        
+        for _ in 0..num_deaths {
+            let mut spin: f64 = rng.gen_range(0.0..1.0);
+            let mut parent: usize = 0;
+            
+            for (i, prob) in probabilities.iter().enumerate() {
+                spin -= prob;
+                if spin <= 0.0 {
+                    parent = i;
+                    break;
+                }
+            }
+            
+            selected_indices.push(parent);
+        }
+        
+        selected_indices
+    }
+
+    fn truncation_selection_death(&self, fitness_scores: &[f64], trunc_percentage: f64, percentage: f64) -> Vec<usize> {
+        let mut rng: rand::prelude::ThreadRng = thread_rng();
+        let n: usize = fitness_scores.len();
+        
+        // Sort indices by fitness scores
+        let mut indices: Vec<usize> = (0..n).collect();
+        indices.sort_by(|&a, &b| fitness_scores[b].partial_cmp(&fitness_scores[a]).unwrap());
+        
+        // Select top percentage of individuals
+        let cutoff: usize = (n as f64 * trunc_percentage).round() as usize;
+        let selected_indices: Vec<usize> = indices[..cutoff].to_vec();
+        
+        // Select individuals for death based on fitness scores
+        let num_deaths: usize = (n as f64 * (1.0 - percentage)).round() as usize;
+        let mut selected_for_death: Vec<usize> = Vec::new();
+        
+        for _ in 0..num_deaths {
+            let parent: usize = selected_indices[rng.gen_range(0..cutoff)];
+            selected_for_death.push(parent);
+        }
+        
+        selected_for_death
     }
 }
