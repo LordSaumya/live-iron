@@ -1,4 +1,4 @@
-use crate::{automaton::Automaton, components::board::{BoardRepresentation, Colour}};
+use crate::{automaton::Automaton, components::{board::{BoardRepresentation, Colour}, genetic::genotype::Genotype}, genetic_automaton::GeneticAutomaton};
 use crate::components::state::State;
 use dioxus::prelude::*;
 use tokio::time::Interval;
@@ -15,7 +15,7 @@ struct BoardSimulationRender {
     interval: u64,
 }
 
-/// The main function that runs the simulation.
+/// The main function that runs the simulation for a cellular automaton.
 /// 
 /// This function takes an automaton and runs the simulation for the given number of steps with the given interval between each step.
 /// To ensure that the interval is consistent, board states are precomputed before rendering the simulation. This may lead to a delay before the simulation starts, depending on the number of steps.
@@ -38,6 +38,51 @@ pub fn simulate<S: State + Into<Colour>>(automaton: &mut Automaton<S>, steps: us
     for _ in 0..steps {
         // Evolve the automaton
         if let Ok(_) = automaton.evolve(1) {
+            let new_state: BoardRepresentation = automaton.board().to_representation();
+            state_vec.push(new_state);
+        }
+    }
+    
+    // Wrap in Arc for thread-safe sharing
+    let states: Arc<Vec<BoardRepresentation>> = Arc::new(state_vec);
+    
+    // Prepare the render context
+    let render: BoardSimulationRender = BoardSimulationRender {
+        states,
+        steps,
+        interval,
+    };
+    
+    dioxus::LaunchBuilder::new().with_context(render).launch(App);
+}
+
+/// The main function that runs the simulation for a genetic automaton.
+/// 
+/// This function takes a genetic automaton and runs the simulation for the given number of steps with the given interval between each step using the given growth and death rates.
+/// To ensure that the interval is consistent, board states are precomputed before rendering the simulation. This may lead to a delay before the simulation starts, depending on the number of steps.
+/// 
+/// Parameters:
+/// 
+/// - `automaton`: The automaton to run the simulation on.
+/// 
+/// - `growth_rate`: The growth rate of the population.
+/// 
+/// - `death_rate`: The death rate of the population.
+/// 
+/// - `steps`: The number of steps to run the simulation for.
+/// 
+/// - `interval`: The interval between each step in milliseconds.
+pub fn simulate_genetic<S: State + Into<Colour>, G: Genotype<S>>(automaton: &mut GeneticAutomaton<S, G>, growth_rate: f64, death_rate: f64, steps: usize, interval: u64) {
+    // Create a vector to store all board states
+    let mut state_vec: Vec<BoardRepresentation> = Vec::with_capacity(steps + 1);
+    
+    // Store the initial state
+    state_vec.push(automaton.board().to_representation());
+    
+    // Precompute all states upfront
+    for _ in 0..steps {
+        // Evolve the automaton
+        if let Ok(_) = automaton.evolve(1, growth_rate, death_rate) {
             let new_state: BoardRepresentation = automaton.board().to_representation();
             state_vec.push(new_state);
         }
