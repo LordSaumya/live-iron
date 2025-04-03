@@ -6,6 +6,8 @@ A performant cellular automata simulator library with visualisation capabilities
 
 ## Components
 
+### Cellular Automata
+
 - `state`: One of the two atomic elements of a cellular automaton, the state module contains the `state` struct, which is used to represent the state of a cell in the simulation. It also contains `state` implementations for Conway's Game of Life and Langton's Ant.
 
 - `rule`: One of the two atomic elements of a cellular automaton, the rule module contains the `rule` trait that defines how the state of a cell changes. It also contains `rule` implementations for Conway's Game of Life and Langton's Ant.
@@ -18,13 +20,23 @@ A performant cellular automata simulator library with visualisation capabilities
 
 - `ui`: The `ui` module uses the `dioxus` library to create a window and render the automaton to the screen. The module contains main simulation function as well as several Dioxus components used to visualise the automaton.
 
+### Genetic Automata
+
+- `genotype`: The atomic element of a genetic automaton, the `genotype` module contains the `genotype` trait, which is used to represent the genotype in the population. It replaces the `rule` trait in the `cellular automata` module as a genetic rule. The `genotype` trait is used to define how the genotype is represented, how it is mutated, how it is evaluated, and how it is used to create offspring.
+
+- `population`: The population module contains the `population` struct, which is used to represent the population of genotypes in the simulation. It contains methods to create a population with a specified size and genotype, evaluate the population, select the best genotypes for reproduction, cull the population, and create offspring.
+
+- `selection_strategy`: The selection strategy module contains the `SelectionStrategy` enum, which provides methods to select parents for reproduction from the population and select genotypes to cull from the population. It contains implementations for several selection strategies, including `Tournament`, `RouletteWheel`, `Rank`, and `Truncation`. The selection strategy is used to select the best genotypes for reproduction based on their fitness scores.
+
+- `genetic_automaton`: The `genetic_automaton` module contains the `GeneticAutomaton` struct, which is used to represent the genetic automaton simulation. It contains methods to create a genetic automaton with a specified population and board, evolve the genetic automaton by applying the genotypes to the board, and visualise the genetic automaton using the `ui` module.
+
 ## Usage
 
 To use the library, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-live-iron = "0.1.0"
+live-iron = "0.1.2"
 ```
 
 Using the library is both simple and flexible. Here's an example of Conway's Game of Life:
